@@ -1,0 +1,47 @@
+version: "3.8"
+services:
+  db:
+    image: mysql:8
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: shirtdb
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
+    volumes:
+      - dbdata:/var/lib/mysql
+    ports:
+      - "3306:3306"
+
+  backend:
+    build: ./backend
+    command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - ./backend:/code
+      - media:/code/media
+    ports:
+      - "8000:8000"
+    environment:
+      - MYSQL_HOST=db
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=root
+      - MYSQL_DATABASE=shirtdb
+      - DEBUG=1
+      - ALLOWED_HOSTS=localhost,127.0.0.1
+      - CORS_ALLOWED_ORIGINS=http://localhost:3000
+    depends_on:
+      - db
+
+  frontend:
+    build: ./frontend
+    command: sh -c "npm install && npm start"
+    volumes:
+      - ./frontend:/app
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_BASE=http://localhost:8000/api/
+
+volumes:
+  dbdata:
+  media:
