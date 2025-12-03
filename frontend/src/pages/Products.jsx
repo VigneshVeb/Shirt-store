@@ -1,27 +1,63 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchProducts } from "../store/slices/productSlice";
-import { Link } from "react-router-dom";
+import { addToCart } from "../store/slices/cartSlice";
 
-export default function Products(){
+export default function Products() {
   const dispatch = useDispatch();
-  const { list, loading } = useSelector(s => s.products);
-  useEffect(()=> { dispatch(fetchProducts()); }, [dispatch]);
-  if(loading) return <div>Loading...</div>;
+  const { items, status } = useSelector((state) => state.products);
+
+  useEffect(() => {
+    dispatch(fetchProducts());
+  }, []);
+
+  if (status === "loading") return <p>Loading...</p>;
+
   return (
-    <div>
-      <h2>Products</h2>
-      <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:20}}>
-        {list.map(p => (
-          <div key={p.id}>
-            <Link to={`/product/${p.id}`}>
-              <img src={p.image ? `http://localhost:8000${p.image}` : "/placeholder.png"} alt={p.name} width={200} />
-              <h3>{p.name}</h3>
-            </Link>
-            <p>₹{p.price}</p>
-          </div>
-        ))}
-      </div>
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(3, 1fr)",
+        gap: 20,
+      }}
+    >
+      {items.map((p) => (
+        <div key={p.id} style={{ border: "1px solid #ddd", padding: 10 }}>
+          <img
+            src={p.image}
+            alt={p.name}
+            style={{ width: "100%", height: 250, objectFit: "cover" }}
+          />
+
+          <h3>{p.name}</h3>
+          <p>Brand: {p.brand?.name}</p>
+          <p>₹{p.price}</p>
+          <p>{p.description}</p>
+
+          {/* 👇 ADD TO CART BUTTON */}
+          <button
+            style={{
+              marginTop: 10,
+              padding: "8px 12px",
+              background: "black",
+              color: "white",
+              border: "none",
+              cursor: "pointer",
+            }}
+            onClick={() =>
+              dispatch(
+                addToCart({
+                  product_id: p.id,
+                  size: "S",
+                  quantity: 1,
+                })
+              )
+            }
+          >
+            Add to Cart
+          </button>
+        </div>
+      ))}
     </div>
   );
 }

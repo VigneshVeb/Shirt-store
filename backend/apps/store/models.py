@@ -20,6 +20,8 @@ class Product(models.Model):
 
 class ProductSize(models.Model):
     SIZE_CHOICES = [('XS','XS'),('S','S'),('M','M'),('L','L'),('XL','XL')]
+    Brand=models.ForeignKey(Brand, on_delete=models.CASCADE, related_name="sizes", null=True)
+
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="sizes")
     size = models.CharField(max_length=2, choices=SIZE_CHOICES)
     stock = models.PositiveIntegerField(default=0)
